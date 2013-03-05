@@ -1,4 +1,3 @@
-aer
-===
+Do a new way of javascript in javascript ways...
 
-A beautiful framework that enhances the javascript power
+Enhance the power of your JS now!!!
