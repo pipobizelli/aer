@@ -4,8 +4,10 @@
  * @author Fernando Faria
  */
 (function() {
-  // environment internals
-	var _@classes = {},
+	// environment internals
+	var _@aerclass = {},
+		_@classes = _@aerclass,
+		_@namespaces = {},
 		_@loading = [],
 		_@loaded,
 		_@env,
@@ -23,11 +25,15 @@
 		override : function() {}
 	};
 	
-	// some directive pointers
+	// some directive
+	Aer['@getclass'] = _@getclass;
+	Aer['@new'] = _@new;
 	Aer['@class'] = _@class;
+	Aer['@overload'] = _@over;
+	Aer['@config'];
 	Aer['@loading'] = _@loading;
 	Aer['@require'] = _@require;
-	Aer['@overload'] = _@over;
+	Aer['@namespace'];
 	Aer['@mix'];
 	Aer['@import'] = _@import;
 	Aer['@loaded'] = _@loaded;
@@ -38,21 +44,48 @@
 	Aer['@prototype'] = _@prototype;
 	
 	/**
-	 * A utility object that have useful methods for object manipulation.
-	 * Applied this technique to not need to extend Object prototype.
+	 * This object is the core of the chained directives.
+	 * First instance directives must return this wrapper.
 	 */
 	function _@wrap(obj) {
 		this.o = obj;
 	}
 	_@wrap.prototype = {
 		constructor : _@wrap,
-		'@prototype' : _@prototype
+		'@prototype' : _@prototype,
+		'@return' : function() {
+			return this.o;
+		},
+		'@global' : function() {
+			
+		}
+		
+	}
+	
+	/**
+	 * 
+	 */
+	function _@new(namespace) {
+		return _@getclass(namespace);
+	}
+	
+	/**
+	 * 
+	 */
+	function _@getclass(namespace) {
+		var n = namespace.split('.'), i, l, scope = _@classes;
+		
+		for (i = 0, l = n.length; i < l; i++) {
+			scope = _classes[i]
+		}
+		
+		return scope;
 	}
 	
 	/**
 	 * Imports required classes
 	 */
-	function _@import(namespace, assync) { 'use strict';
+	function _@import(namespace, async) { 'use strict';
 		if (_@classes[namespace]) { return; }
 		
 		var klass = document.createElement('script');
@@ -64,7 +97,7 @@
 		
 		document.getElementsByTagName('head').appendChild(klass);
 		
-		if (assync) {
+		if (async) {
 			_@log('Loading Aer[@' + namespace + ']...');
 			
 			while(!_@classes[namespace]) {
@@ -90,6 +123,24 @@
 	}
 	
 	/**
+	 * 
+	 */
+	function _@register() { 'use strict';
+		
+	}
+	
+	/**
+	 * 
+	 */
+	function _@namespace(str) { 'use strict';
+		var n = str.split['.'], i, l;
+		
+		for (i = 0, l = n.length; i < l; i++) {
+			
+		}
+	}
+	
+	/**
 	 * Mix multiples objects
 	 */
 	function _@mix() { 'use strict';
@@ -105,34 +156,41 @@
 	}
 	
 	/**
+	 * Create the namespace in the classes
+	 */
+	function _@chain(str) { 'use strict';
+		var n = str.split['.'], i, l, scope = _@aerclass;
+		
+		for (i = 0, l = n.length; i < l; i++) {
+			if (!scope[i]) {
+				scope[i] = {};
+			}
+			scope = scope[i];
+		}
+		
+		return scope;
+	}
+	
+	/**
 	 * Implements classes
 	 */
 	function _@class() { 'use strict';
 		_o = {
 			'String,Function' : function(namespace, implementation) {
-				_@classes[namespace] = implementation;
+				var o = _@chain(namespace);
 				
-				return new _@wrap(_@classes[namespace]);
+				o = implementation;
+				o.prototype.constructor = _@getclass(namespace);
+				
+				return new _@wrap(o);
 			},
 			'String,_@over' : function(namespace, over) {
-				_@classes[namespace] = over.overloadIt();
+				var o = _@chain(namespace);
 				
-				return new _@wrap(_@classes[namespace]);
-			}
-		};
-		
-		return function() {
-			return _@overload(_o, arguments, this);
-		}
-	}
-	
-	function _@prototype() { 'use strict';
-		_o = {
-			'Object' : function(o) {
+				o = over.overloadIt();
+				o.prototype.constructor = _@getclass(namespace);
 				
-			},
-			'_@class,Object' : function(c, o) {
-				
+				return new _@wrap(o);
 			}
 		};
 		
@@ -142,7 +200,25 @@
 	}
 	
 	/**
-	 * A great way to overload function!!! XD
+	 * 
+	 */
+	function _@prototype() { 'use strict';
+		_o = {
+			'Object' : function(o) {
+				return this;
+			},
+			'_@class,Object' : function(c, o) {
+				return this;
+			}
+		};
+		
+		return function() {
+			return _@overload(_o, arguments, this);
+		}
+	}
+	
+	/**
+	 * A great way to overload functions!!! XD
 	 */
 	function _@overload(pointer, args, context) { 'use strict';
 		var regex = /function\s+(\w+)s*/, types = [];
@@ -162,27 +238,15 @@
 			return new _@over(o);
 		}
 		
-		this._o = o;
-	}
-	_@over.prototype = {
-		constructor : _@over,
-		overloadIt : function() {
+		// must be privileged
+		this.overloadIt = function() {
 			return function() {
-				_@overloaded(_o, arguments, this);
+				return _@overloaded(o, arguments, this);
 			}
 		}
+	}
+	_@over.prototype = {
+		constructor : _@over
 	};
 
 })();
-
-
-Aer['@class']('Timeline', Aer['@overload']({
-	'String' : function(str) {
-		
-	},
-	'String,Number' : function(str, n) {
-		
-	}
-}))['@prototype']({
-
-});
