@@ -4,16 +4,30 @@
  * @author Fernando Faria
  */
 (function() {
+	// normalize the aer$classname prototype attribute to the core javascript
+	Object.prototype.aer$classname = 'Object';Number.prototype.aer$classname = 'Number';Array.prototype.aer$classname = 'Array';String.prototype.aer$classname = 'String';Boolean.prototype.aer$classname = 'Boolean';RegExp.prototype.aer$classname = 'RegExp';Error.prototype.aer$classname = 'Error';Function.prototype.aer$classname = 'Function';Date.prototype.aer$classname = 'Date';
+	
+	// normalize the aer$classname prototype attribute
+	for (i in window) {//console.log(i);
+		if (window[i] != null) {
+			if (window[i].prototype != null) {
+				if (window[i].prototype.constructor != null) {
+					window[i].prototype.aer$classname = /function\s+(\w+)s*/.exec(window[i].prototype.constructor.toString()) != null ? /function\s+(\w+)s*/.exec(window[i].prototype.constructor.toString())[1] : '';
+				}
+			}
+		}
+	}
+
 	// environment internals
-	var _@aerclass = {},
-		_@classes = _@aerclass,
-		_@namespaces = {},
-		_@loading = [],
-		_@loaded,
-		_@env,
-		_@config = {},
-		_@overloaded,
-		_@root;
+	var _$aerclass = {},
+		_$classes = _$aerclass,
+		_$namespaces = {},
+		_$loading = [],
+		_$loaded,
+		_$env,
+		_$config = {},
+		_$overloaded,
+		_$root;
 	
 		
 	function Aer(requires, environment) { 'use strict';
@@ -21,38 +35,40 @@
 	}
 	Aer.prototype = {
 		constructor : Aer.prototype,
+		aer$classname : 'Aer',
 		extend : function() {},
 		override : function() {}
 	};
 	
 	// some directive
-	Aer['@getclass'] = _@getclass;
-	Aer['@new'] = _@new;
-	Aer['@class'] = _@class;
-	Aer['@overload'] = _@over;
+	Aer['@getclass'] = _$getclass;
+	Aer['@new'] = _$new;
+	Aer['@class'] = _$class;
+	Aer['@overload'] = _$over;
 	Aer['@config'];
-	Aer['@loading'] = _@loading;
-	Aer['@require'] = _@require;
+	Aer['@loading'] = _$loading;
+	//Aer['@require'] = _$require;
 	Aer['@namespace'];
 	Aer['@mix'];
-	Aer['@import'] = _@import;
-	Aer['@loaded'] = _@loaded;
+	Aer['@import'] = _$import;
+	Aer['@loaded'] = _$loaded;
 	Aer['@css'];
 	Aer['@env'];
-	Aer['@sync'] = _@sync;
-	Aer['@async'] = _@async;
-	Aer['@prototype'] = _@prototype;
+	Aer['@sync'] = _$sync;
+	Aer['@async'] = _$async;
+	Aer['@prototype'] = _$prototype;
 	
 	/**
 	 * This object is the core of the chained directives.
 	 * First instance directives must return this wrapper.
 	 */
-	function _@wrap(obj) {
+	function _$wrap(obj) {
 		this.o = obj;
 	}
-	_@wrap.prototype = {
-		constructor : _@wrap,
-		'@prototype' : _@prototype,
+	_$wrap.prototype = {
+		constructor : _$wrap,
+		aer$classname : '_$wrap',
+		'@prototype' : _$prototype,
 		'@return' : function() {
 			return this.o;
 		},
@@ -65,18 +81,18 @@
 	/**
 	 * 
 	 */
-	function _@new(namespace) {
-		return _@getclass(namespace);
+	function _$new(namespace) {
+		return _$getclass(namespace);
 	}
 	
 	/**
 	 * 
 	 */
-	function _@getclass(namespace) {
-		var n = namespace.split('.'), i, l, scope = _@classes;
+	function _$getclass(namespace) {
+		var n = namespace.split('.'), i, l, scope = _$classes;
 		
 		for (i = 0, l = n.length; i < l; i++) {
-			scope = _classes[i]
+			scope = _$classes[i]
 		}
 		
 		return scope;
@@ -85,12 +101,12 @@
 	/**
 	 * Imports required classes
 	 */
-	function _@import(namespace, async) { 'use strict';
-		if (_@classes[namespace]) { return; }
+	function _$import(namespace, async) { 'use strict';
+		if (_$classes[namespace]) { return; }
 		
 		var klass = document.createElement('script');
 		
-		_@loading.classes.push(classNamespace);
+		_$loading.classes.push(classNamespace);
 		
 		klass.type = 'text/javascript';
 		klass.src = namespace.replace(/\./g, '/') + '.js';
@@ -98,41 +114,41 @@
 		document.getElementsByTagName('head').appendChild(klass);
 		
 		if (async) {
-			_@log('Loading Aer[@' + namespace + ']...');
+			_$log('Loading Aer[@' + namespace + ']...');
 			
-			while(!_@classes[namespace]) {
+			while(!_$classes[namespace]) {
 				// only wait for the class to load
 			}
 			
-			_@log('Aer[@' + namespace + '] has loaded');
+			_$log('Aer[@' + namespace + '] has loaded');
 		}
 	}
 	
 	/**
 	 * Import required classes synchronously
 	 */
-	function _@sync(namespace) { 'use strict';
-		_@import(namespace, false);
+	function _$sync(namespace) { 'use strict';
+		_$import(namespace, false);
 	}
 	
 	/**
 	 * Import required classes asynchronously
 	 */
-	function _@async() { 'use strict';
-		_@import(namespace, true);
+	function _$async() { 'use strict';
+		_$import(namespace, true);
 	}
 	
 	/**
 	 * 
 	 */
-	function _@register() { 'use strict';
+	function _$register() { 'use strict';
 		
 	}
 	
 	/**
 	 * 
 	 */
-	function _@namespace(str) { 'use strict';
+	function _$namespace(str) { 'use strict';
 		var n = str.split['.'], i, l;
 		
 		for (i = 0, l = n.length; i < l; i++) {
@@ -143,7 +159,7 @@
 	/**
 	 * Mix multiples objects
 	 */
-	function _@mix() { 'use strict';
+	function _$mix() { 'use strict';
 		var obj = {}, i, prop;
 		
 		for (i = 0; i < arguments.length; i++) {
@@ -158,9 +174,9 @@
 	/**
 	 * Create the namespace in the classes
 	 */
-	function _@chain(str) { 'use strict';
-		var n = str.split['.'], i, l, scope = _@aerclass;
-		
+	function _$chain(str) { 'use strict';
+		var n = str.split('.'), i, l, scope = _$aerclass;
+
 		for (i = 0, l = n.length; i < l; i++) {
 			if (!scope[i]) {
 				scope[i] = {};
@@ -174,54 +190,58 @@
 	/**
 	 * Implements classes
 	 */
-	function _@class() { 'use strict';
-		_o = {
+	function _$class() { 'use strict';
+		var _o = {
 			'String,Function' : function(namespace, implementation) {
-				var o = _@chain(namespace);
+				var o = _$chain(namespace);
 				
-				o = implementation;
-				o.prototype.constructor = _@getclass(namespace);
+				o = implementation
+				o.prototype = {
+					classname : namespace
+				};
 				
-				return new _@wrap(o);
+				return new _$wrap(o);
 			},
-			'String,_@over' : function(namespace, over) {
-				var o = _@chain(namespace);
+			'String,_$over' : function(namespace, over) {
+				var o = _$chain(namespace);
 				
 				o = over.overloadIt();
-				o.prototype.constructor = _@getclass(namespace);
+				o.prototype.constructor = _$getclass(namespace);
 				
-				return new _@wrap(o);
+				return new _$wrap(o);
 			}
 		};
 		
-		return function() {
-			return _@overload(_o, arguments, this);
-		}
+		//console.log(_$aerclass);
+		
+		return _$overload(_o, arguments, this);
 	}
 	
 	/**
 	 * 
 	 */
-	function _@prototype() { 'use strict';
+	function _$prototype() { 'use strict';
 		_o = {
 			'Object' : function(o) {
 				return this;
 			},
-			'_@class,Object' : function(c, o) {
+			'_$class,Object' : function(c, o) {
 				return this;
 			}
 		};
 		
 		return function() {
-			return _@overload(_o, arguments, this);
+			return _$overload(_o, arguments, this);
 		}
 	}
 	
 	/**
 	 * A great way to overload functions!!! XD
+	 * 
+	 * For more details about this, visit https://github.com/feebaa/overloadJS and see the source
 	 */
-	function _@overload(pointer, args, context) { 'use strict';
-		var regex = /function\s+(\w+)s*/, types = [];
+	function _$overload(pointer, args, context) { 'use strict';
+		var regex = /function\s+(\w+)s*/, types = [], i;
 		
 		for (i = 0; i < args.length; i++) {
 			types.push(regex.exec(args[i].constructor.toString())[1]);
@@ -231,22 +251,36 @@
 	}
 	
 	/**
+	 * The modified overload that works with the classname prototype attribute
+	 */
+	function _$$overload(pointer, args, context) {
+		var types = [], i;
+		
+		for (i = 0; i < args.length; i++) {
+			types.push(args[i].aer$classname);
+		}
+		
+		return pointer[types.toString()].apply(context, args);
+	}
+	
+	/**
 	 * This must be an object that Aer['@class'] can recognize overloaded classes implementations
 	 */
-	function _@over(o) { 'use strict';
-		if (!(this instanceof _@over)) {
-			return new _@over(o);
+	function _$over(o) { 'use strict';
+		if (!(this instanceof _$over)) {
+			return new _$over(o);
 		}
 		
 		// must be privileged
 		this.overloadIt = function() {
 			return function() {
-				return _@overloaded(o, arguments, this);
+				return _$overloaded(o, arguments, this);
 			}
 		}
 	}
-	_@over.prototype = {
-		constructor : _@over
+	_$over.prototype = {
+		aer$classname : '_$over'
 	};
-
+	
+	window.Aer = Aer;
 })();
