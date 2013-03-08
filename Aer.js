@@ -3,7 +3,7 @@
  * 
  * @author Fernando Faria
  */
-(function() {
+(function($global) {
 	// normalize the aer$classname prototype attribute to the core javascript
 	Object.prototype.aer$classname = 'Object';Number.prototype.aer$classname = 'Number';Array.prototype.aer$classname = 'Array';String.prototype.aer$classname = 'String';Boolean.prototype.aer$classname = 'Boolean';RegExp.prototype.aer$classname = 'RegExp';Error.prototype.aer$classname = 'Error';Function.prototype.aer$classname = 'Function';Date.prototype.aer$classname = 'Date';
 	
@@ -20,7 +20,7 @@
 
 	// environment internals
 	var _$aerclass = {},
-		_$classes = _$aerclass,
+		_$classes = [],
 		_$namespaces = {},
 		_$loading = [],
 		_$loaded,
@@ -34,7 +34,7 @@
 		environment(Aer);
 	}
 	Aer.prototype = {
-		constructor : Aer.prototype,
+		constructor : Aer,
 		aer$classname : 'Aer',
 		extend : function() {},
 		override : function() {}
@@ -193,35 +193,43 @@
 	function _$class() { 'use strict';
 		var _o = {
 			'String,Function' : function(namespace, implementation) {
+				if (_$classes.indexOf(namespace) != -1) {
+					throw new Error();
+				}
+				
 				var o = _$chain(namespace);
 				
-				o = implementation
-				o.prototype = {
-					classname : namespace
-				};
+				o = implementation;
+				o.prototype.aer$classname = namespace;
+				
+				_$classes.push(namespace);
 				
 				return new _$wrap(o);
 			},
 			'String,_$over' : function(namespace, over) {
+				if (_$classes.indexOf(namespace) != -1) {
+					throw new Error();
+				}
+				
 				var o = _$chain(namespace);
 				
 				o = over.overloadIt();
-				o.prototype.constructor = _$getclass(namespace);
+				o.prototype.aer$classname = namespace;
+				
+				_$classes.push(namespace);
 				
 				return new _$wrap(o);
 			}
 		};
 		
-		//console.log(_$aerclass);
-		
-		return _$overload(_o, arguments, this);
+		return _$$overload(_o, arguments, this);
 	}
 	
 	/**
 	 * 
 	 */
 	function _$prototype() { 'use strict';
-		_o = {
+		var _o = {
 			'Object' : function(o) {
 				return this;
 			},
@@ -231,26 +239,13 @@
 		};
 		
 		return function() {
-			return _$overload(_o, arguments, this);
+			return _$$overload(_o, arguments, this);
 		}
 	}
 	
 	/**
 	 * A great way to overload functions!!! XD
 	 * 
-	 * For more details about this, visit https://github.com/feebaa/overloadJS and see the source
-	 */
-	function _$overload(pointer, args, context) { 'use strict';
-		var regex = /function\s+(\w+)s*/, types = [], i;
-		
-		for (i = 0; i < args.length; i++) {
-			types.push(regex.exec(args[i].constructor.toString())[1]);
-		}
-		
-		return pointer[types.toString()].apply(context, args);
-	}
-	
-	/**
 	 * The modified overload that works with the classname prototype attribute
 	 */
 	function _$$overload(pointer, args, context) {
@@ -274,13 +269,14 @@
 		// must be privileged
 		this.overloadIt = function() {
 			return function() {
-				return _$overloaded(o, arguments, this);
+				return _$$overload(o, arguments, this);
 			}
 		}
 	}
 	_$over.prototype = {
+		constructor : _$over,
 		aer$classname : '_$over'
 	};
 	
-	window.Aer = Aer;
-})();
+	$global.Aer = Aer;
+})(this);
