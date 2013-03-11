@@ -51,7 +51,7 @@
 	//Aer['@require'] = _$require;
 	Aer['@extend'] = _$extend;
 	Aer['@namespace'];
-	Aer['@directive'];
+	Aer['@define'];
 	Aer['@mix'];
 	Aer['@import'] = _$import;
 	Aer['@loaded'] = _$loaded;
@@ -70,14 +70,18 @@
 	}
 	_$wrap.prototype = {
 		constructor : _$wrap,
-		aer$classname : '_$wrap',
-		'@prototype' : _$prototype,
-		'@return' : function() {
-			return this.o;
-		},
-		'@global' : function() {
-			
-		}
+		aer$classname : '_$wrap'
+	}
+	
+	_$wrap.prototype['@prototype'] = function() {
+		
+	}
+	
+	_$wrap.prototype['@return'] = function() {
+		
+	}
+	
+	_$wrap.prototype['@global'] = function() {
 		
 	}
 	
@@ -152,7 +156,14 @@
 	/**
 	 * 
 	 */
-	function _$extend(context, classes) {
+	function _$define(directive, fn) { 'use strict';
+		Aer[directive] = fn;
+	}
+	
+	/**
+	 * 
+	 */
+	function _$extend(context, classes) { 'use strict';
 		var i, l;
 		
 		for (i=0, l=classes.length; i<l; i++) {
@@ -264,7 +275,7 @@
 	/**
 	 * A great way to overload functions!!! XD
 	 * 
-	 * The modified overload that works with the classname prototype attribute
+	 * The modified overload that works with the aer$classname prototype attribute
 	 */
 	function _$$overload(pointer, args, context) {
 		var types = [], i;
@@ -279,7 +290,7 @@
 	/**
 	 * This must be an object that Aer['@class'] can recognize overloaded classes implementations
 	 */
-	function _$over() {
+	function _$over() { 'use strict';
 		if (this.aer$classname === 'Function') {
 			if (arguments[0] && arguments[1]) {
 				return new _$over(arguments[0], arguments[1]);
@@ -295,7 +306,7 @@
 	/**
 	 * 
 	 */
-	_$over['Object'] = function(o) {
+	_$over['Object'] = function(o) { 'use strict';
 		return function() {
 			return _$$overload(o, arguments, this);
 		}
@@ -304,7 +315,7 @@
 	/**
 	 * 
 	 */
-	_$over['String,Object'] = function(s, o) {
+	_$over['String,Object'] = function(s, o) { 'use strict';
 		this.overload = function() {
 			return function() {
 				return _$$overload(o, arguments, this);
