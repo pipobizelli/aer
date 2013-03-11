@@ -21,18 +21,25 @@
 	// environment internals
 	var _$aerclass = {},
 		_$classes = [],
+		_$dependencies = [],
 		_$namespaces = {},
 		_$loading = [],
-		_$loaded,
+		_$loaded = 0,
 		_$new = {},
 		_$env,
 		_$config = {},
 		_$overloaded,
-		_$root;
+		_$root,
+		_$main,
+		_$process = [];
 	
 		
-	function Aer(requires, environment) { 'use strict';
-		environment(Aer);
+	function Aer(fn) { 'use strict';
+		if (this == undefined) {
+			return new Aer(fn);
+		}
+		
+		_$main = fn;
 	}
 	Aer.prototype = {
 		constructor : Aer,
@@ -59,6 +66,7 @@
 	Aer['@env'];
 	Aer['@sync'] = _$sync;
 	Aer['@async'] = _$async;
+	Aer['@block'] = new Array();
 	//Aer['@prototype'] = _$prototype;
 	
 	/**
@@ -67,6 +75,14 @@
 	 */
 	function _$wrap(obj) {
 		this.o = obj;
+		
+		for (i=0; i<_$dependencies.length; i++) {
+			if (!_$new[_$dependencies[i]]) {
+				return this;
+			}
+		}
+		
+		_$main();
 	}
 	_$wrap.prototype = {
 		constructor : _$wrap,
@@ -101,14 +117,6 @@
 	/**
 	 * 
 	 */
-	function _$new(namespace, args) {
-		var obj = _$getclass(namespace);
-		return obj.apply(obj, args)
-	}
-	
-	/**
-	 * 
-	 */
 	function _$getclass(namespace) {
 		var n = namespace.split('.'), i, l, scope = _$aerclass;
 		
@@ -125,24 +133,15 @@
 	function _$import(namespace, async) { 'use strict';
 		if (_$classes[namespace]) { return; }
 		
-		var klass = document.createElement('script');
+		_$dependencies.push(namespace);
 		
-		_$loading.classes.push(classNamespace);
+		var klass = document.createElement('script');
+		var _n = namespace.split('.');
 		
 		klass.type = 'text/javascript';
-		klass.src = namespace.replace(/\./g, '/') + '.js';
+		klass.src = namespace.replace(/\./g, '/') + '\\' + namespace + '.js';
 		
-		document.getElementsByTagName('head').appendChild(klass);
-		
-		if (async) {
-			_$log('Loading Aer[@' + namespace + ']...');
-			
-			while(!_$classes[namespace]) {
-				// only wait for the class to load
-			}
-			
-			_$log('Aer[@' + namespace + '] has loaded');
-		}
+		document.getElementsByTagName('head')[0].appendChild(klass);
 	}
 	
 	/**
