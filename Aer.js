@@ -24,6 +24,7 @@
 		_$namespaces = {},
 		_$loading = [],
 		_$loaded,
+		_$new = {},
 		_$env,
 		_$config = {},
 		_$overloaded,
@@ -42,13 +43,15 @@
 	
 	// some directive
 	Aer['@getclass'] = _$getclass;
-	Aer['@new'] = _$new;
+	Aer['@'] = _$new;
 	Aer['@class'] = _$class;
 	Aer['@overload'] = _$over;
 	Aer['@config'];
 	Aer['@loading'] = _$loading;
 	//Aer['@require'] = _$require;
+	Aer['@extend'] = _$extend;
 	Aer['@namespace'];
+	Aer['@directive'];
 	Aer['@mix'];
 	Aer['@import'] = _$import;
 	Aer['@loaded'] = _$loaded;
@@ -81,18 +84,19 @@
 	/**
 	 * 
 	 */
-	function _$new(namespace) {
-		return _$getclass(namespace);
+	function _$new(namespace, args) {
+		var obj = _$getclass(namespace);
+		return obj.apply(obj, args)
 	}
 	
 	/**
 	 * 
 	 */
 	function _$getclass(namespace) {
-		var n = namespace.split('.'), i, l, scope = _$classes;
+		var n = namespace.split('.'), i, l, scope = _$aerclass;
 		
 		for (i = 0, l = n.length; i < l; i++) {
-			scope = _$classes[i]
+			scope = scope[n[i]];
 		}
 		
 		return scope;
@@ -148,6 +152,17 @@
 	/**
 	 * 
 	 */
+	function _$extend(context, classes) {
+		var i, l;
+		
+		for (i=0, l=classes.length; i<l; i++) {
+			_$new(classes[i]).apply(context, []);
+		}
+	}
+	
+	/**
+	 * 
+	 */
 	function _$namespace(str) { 'use strict';
 		var n = str.split['.'], i, l;
 		
@@ -174,17 +189,24 @@
 	/**
 	 * Create the namespace in the classes
 	 */
-	function _$chain(str) { 'use strict';
-		var n = str.split('.'), i, l, scope = _$aerclass;
-
+	function _$chain(namespace, fn) { 'use strict';
+		var n = namespace.split('.'), i, l, scope = _$aerclass;
+		
+		fn.prototype.aer$classname = namespace;
+		
 		for (i = 0, l = n.length; i < l; i++) {
-			if (!scope[i]) {
-				scope[i] = {};
+			if (!scope[n[i]]) {
+				scope[n[i]] = {};
 			}
-			scope = scope[i];
+			
+			if (i === (l-1)) {
+				scope[n[i]] = fn;
+			} else {
+				scope = scope[n[i]];
+			}
 		}
 		
-		return scope;
+		return scope[n[i-1]];
 	}
 	
 	/**
@@ -197,12 +219,10 @@
 					throw new Error();
 				}
 				
-				var o = _$chain(namespace);
-				
-				o = implementation;
-				o.prototype.aer$classname = namespace;
-				
+				var o = _$chain(namespace, implementation);
+
 				_$classes.push(namespace);
+				_$new[namespace] = o;
 				
 				return new _$wrap(o);
 			},
@@ -211,12 +231,10 @@
 					throw new Error();
 				}
 				
-				var o = _$chain(namespace);
-				
-				o = over.overloadIt();
-				o.prototype.aer$classname = namespace;
-				
+				var o = _$chain(namespace, over.overload());
+
 				_$classes.push(namespace);
+				_$new[namespace] = o;
 				
 				return new _$wrap(o);
 			}
@@ -261,22 +279,38 @@
 	/**
 	 * This must be an object that Aer['@class'] can recognize overloaded classes implementations
 	 */
-	function _$over(o) { 'use strict';
-		if (!(this instanceof _$over)) {
-			return new _$over(o);
+	function _$over() {
+		if (this.aer$classname === 'Function') {
+			if (arguments[0] && arguments[1]) {
+				return new _$over(arguments[0], arguments[1]);
+			}
+			
+			return new _$over(arguments[0]);
 		}
 		
-		// must be privileged
-		this.overloadIt = function() {
+		return _$$overload(_$over, arguments, this);
+	}
+	_$over.prototype.aer$classname = '_$over';
+	
+	/**
+	 * 
+	 */
+	_$over['Object'] = function(o) {
+		return function() {
+			return _$$overload(o, arguments, this);
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	_$over['String,Object'] = function(s, o) {
+		this.overload = function() {
 			return function() {
 				return _$$overload(o, arguments, this);
 			}
 		}
 	}
-	_$over.prototype = {
-		constructor : _$over,
-		aer$classname : '_$over'
-	};
 	
 	$global.Aer = Aer;
-})(this); 
+})(this);
