@@ -59,7 +59,7 @@
 	Aer['@env'];
 	Aer['@sync'] = _$sync;
 	Aer['@async'] = _$async;
-	Aer['@prototype'] = _$prototype;
+	//Aer['@prototype'] = _$prototype;
 	
 	/**
 	 * This object is the core of the chained directives.
@@ -73,9 +73,22 @@
 		aer$classname : '_$wrap'
 	}
 	
-	_$wrap.prototype['@prototype'] = function() {
+	_$wrap.prototype['@prototype'] = (function() {
+		var _o = {
+			'Object' : function(obj) {
+				var _class = this.o.prototype.aer$classname;
+				
+				this.o.prototype = obj;
+				this.o.prototype.aer$classname = _class;
+				
+				return this;
+			}
+		}
 		
-	}
+		return function() {
+			return _$$overload(_o, arguments, this);
+		}
+	})();
 	
 	_$wrap.prototype['@return'] = function() {
 		
