@@ -20,6 +20,7 @@
 
 	// environment internals
 	var _$aerclass = {},
+		_$all = false,
 		_$classes = [],
 		_$dependencies = [],
 		_$namespaces = {},
@@ -29,8 +30,8 @@
 		_$env,
 		_$config = {},
 		_$overloaded,
-		_$root,
-		_$main,
+		_$root = '',
+		_$mainprog,
 		_$process = [];
 	
 		
@@ -67,6 +68,8 @@
 	Aer['@sync'] = _$sync;
 	Aer['@async'] = _$async;
 	Aer['@block'] = new Array();
+	Aer['@project'] = _$project;
+	Aer['@main'] = _$main;
 	//Aer['@prototype'] = _$prototype;
 	
 	/**
@@ -75,14 +78,6 @@
 	 */
 	function _$wrap(obj) {
 		this.o = obj;
-		
-		for (i=0; i<_$dependencies.length; i++) {
-			if (!_$new[_$dependencies[i]]) {
-				return this;
-			}
-		}
-		
-		_$main();
 	}
 	_$wrap.prototype = {
 		constructor : _$wrap,
@@ -128,6 +123,69 @@
 	}
 	
 	/**
+	 * 
+	 */
+	function _$run() {
+		
+	}
+	
+	/**
+	 * 
+	 */
+	function _$main(fn) {
+		_$mainprog = fn;
+		
+		var check = setInternval(function() {
+			_$check(check);
+		}, 300);
+	}
+	
+	/**
+	 * 
+	 */
+	function _$check(timevar) {
+		var i, l;
+		
+		for (i=0, l=_$dependencies.length; i<l; i++) {
+			if (!_$new[_$dependencies[i]]) {
+				return;
+			}
+		}
+		
+		clearInterval(timevar);
+		
+		_$mainprog();
+	}
+	
+	/**
+	 * {
+	 * 		'@main' : 
+	 * }
+	 */
+	function _$project(cfg) {
+		var i, l;
+		
+		_$root = cfg['@root'] || '';
+		
+		for (i=0, l=cfg['@dependencies'].length; i<l; i++) {
+			Aer['@sync'](cfg['@dependencies'][i]);
+		}
+		
+		if (cfg['@main']) {
+			Aer['@sync'](cfg['@main']);
+		}
+	}
+	
+	Aer['@project']({
+		'@root' : '../app/folder',
+		'@main' : 'Aer.MainApp',
+		'@dependencies' : [
+		     'Aer.MainApp.Class1',
+		     'Aer.MainApp.Class2'
+		 ]
+	});
+	
+	/**
 	 * Imports required classes
 	 */
 	function _$import(namespace, async) { 'use strict';
@@ -139,7 +197,7 @@
 		var _n = namespace.split('.');
 		
 		klass.type = 'text/javascript';
-		klass.src = namespace.replace(/\./g, '/') + '\\' + namespace + '.js';
+		klass.src = _$root + namespace.replace(/\./g, '/') + '\\' + namespace + '.js';
 		
 		document.getElementsByTagName('head')[0].appendChild(klass);
 	}
