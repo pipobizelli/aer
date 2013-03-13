@@ -27,16 +27,14 @@
 		_$loading = [],
 		_$loaded = 0,
 		_$new = {},
-		_$env,
 		_$config = {},
 		_$overloaded,
 		_$root = '',
-		_$mainprog,
-		_$process = [];
+		_$mainprog;
 	
 		
 	function Aer(fn) { 'use strict';
-		if (this == undefined) {
+		if (this === undefined) {
 			return new Aer(fn);
 		}
 		
@@ -50,24 +48,18 @@
 	};
 	
 	// some directive
-	Aer['@getclass'] = _$getclass;
 	Aer['@'] = _$new;
 	Aer['@class'] = _$class;
 	Aer['@overload'] = _$over;
 	Aer['@config'];
 	Aer['@loading'] = _$loading;
 	//Aer['@require'] = _$require;
-	Aer['@extend'] = _$extend;
 	Aer['@namespace'];
 	Aer['@define'];
 	Aer['@mix'];
 	Aer['@import'] = _$import;
-	Aer['@loaded'] = _$loaded;
-	Aer['@css'];
-	Aer['@env'];
-	Aer['@sync'] = _$sync;
+	Aer['@require'] = _$require;
 	Aer['@async'] = _$async;
-	Aer['@block'] = new Array();
 	Aer['@project'] = _$project;
 	Aer['@main'] = _$main;
 	//Aer['@prototype'] = _$prototype;
@@ -80,7 +72,6 @@
 		this.o = obj;
 	}
 	_$wrap.prototype = {
-		constructor : _$wrap,
 		aer$classname : '_$wrap'
 	}
 	
@@ -110,38 +101,17 @@
 	}
 	
 	/**
-	 * 
-	 */
-	function _$getclass(namespace) {
-		var n = namespace.split('.'), i, l, scope = _$aerclass;
-		
-		for (i = 0, l = n.length; i < l; i++) {
-			scope = scope[n[i]];
-		}
-		
-		return scope;
-	}
-	
-	/**
-	 * 
-	 */
-	function _$run() {
-		
-	}
-	
-	/**
-	 * 
+	 * Define the main program
 	 */
 	function _$main(fn) {
 		_$mainprog = fn;
-		
-		var check = setInternval(function() {
+		var check = setInterval(function() {
 			_$check(check);
-		}, 300);
+		}, 100);
 	}
 	
 	/**
-	 * 
+	 * Check the dependencies, than run the main program
 	 */
 	function _$check(timevar) {
 		var i, l;
@@ -158,9 +128,7 @@
 	}
 	
 	/**
-	 * {
-	 * 		'@main' : 
-	 * }
+	 *
 	 */
 	function _$project(cfg) {
 		var i, l;
@@ -176,14 +144,72 @@
 		}
 	}
 	
-	Aer['@project']({
-		'@root' : '../app/folder',
-		'@main' : 'Aer.MainApp',
-		'@dependencies' : [
-		     'Aer.MainApp.Class1',
-		     'Aer.MainApp.Class2'
-		 ]
-	});
+	/**
+	 *
+	 */
+	function _$class(namespace) {
+		var transitory = new _$transitory();
+		
+		transitory.namespace = namespace;
+		
+		return transitory;
+	}
+	
+	/**
+	 * Transitory object
+	 */
+	function _$transitory() {
+		this.namespace;
+		this.extended;
+		this.o;
+	}
+	_$transitory.prototype = {
+		aer$classname : '_$transitory',
+		'@extend' : function() {
+			this.extended = arguments;
+			return this;
+		},
+		'@' : function() {
+			_o = {
+				'_$over' : function(over) {
+					var o = _$chain(this.namespace, over.overload());
+
+					_$classes.push(this.namespace);
+					_$new[this.namespace] = o;
+					
+					this.o = o;
+					return this;
+				},
+				'Function' : function(implementation) {
+					var o = _$chain(this.namespace, implementation);
+					
+					_$classes.push(this.namespace);
+					_$new[this.namespace] = o;
+					
+					this.o = o;
+					return this;
+				}
+			};
+			
+			return _$$overload(_o, arguments, this);
+		},
+		'@prototype' : function() {
+			var _o = {
+				'Object' : function(obj) {
+					var _class = this.o.prototype.aer$classname;
+					
+					this.o.prototype = obj;
+					this.o.prototype.aer$classname = _class;
+					
+					return this;
+				}
+			}
+			
+
+			return _$$overload(_o, arguments, this);
+		}
+	}
+	
 	
 	/**
 	 * Imports required classes
@@ -197,7 +223,7 @@
 		var _n = namespace.split('.');
 		
 		klass.type = 'text/javascript';
-		klass.src = _$root + namespace.replace(/\./g, '/') + '\\' + namespace + '.js';
+		klass.src = _$root + namespace.replace(/\./g, '/') + '\\' + _n[_n.length - 1] + '.js';
 		
 		document.getElementsByTagName('head')[0].appendChild(klass);
 	}
@@ -205,7 +231,7 @@
 	/**
 	 * Import required classes synchronously
 	 */
-	function _$sync(namespace) { 'use strict';
+	function _$require(namespace) { 'use strict';
 		_$import(namespace, false);
 	}
 	
@@ -228,17 +254,6 @@
 	 */
 	function _$define(directive, fn) { 'use strict';
 		Aer[directive] = fn;
-	}
-	
-	/**
-	 * 
-	 */
-	function _$extend(context, classes) { 'use strict';
-		var i, l;
-		
-		for (i=0, l=classes.length; i<l; i++) {
-			_$new(classes[i]).apply(context, []);
-		}
 	}
 	
 	/**
@@ -271,7 +286,7 @@
 	 * Create the namespace in the classes
 	 */
 	function _$chain(namespace, fn) { 'use strict';
-		var n = namespace.split('.'), i, l, scope = _$aerclass;
+		var n = namespace.split('.'), i, l, prop, clone = {}, scope = _$aerclass;
 		
 		fn.prototype.aer$classname = namespace;
 		
@@ -281,47 +296,23 @@
 			}
 			
 			if (i === (l-1)) {
+				for (prop in scope[n[i]]) {
+					if (prop !== 'aer$classname') {
+						clone[prop] = scope[n[i]][prop];
+					}
+				}
+				
 				scope[n[i]] = fn;
+				
+				for (prop in clone) {
+					scope[n[i]][prop] = clone[prop];
+				}
 			} else {
 				scope = scope[n[i]];
 			}
 		}
 		
 		return scope[n[i-1]];
-	}
-	
-	/**
-	 * Implements classes
-	 */
-	function _$class() { 'use strict';
-		var _o = {
-			'String,Function' : function(namespace, implementation) {
-				if (_$classes.indexOf(namespace) != -1) {
-					throw new Error();
-				}
-				
-				var o = _$chain(namespace, implementation);
-
-				_$classes.push(namespace);
-				_$new[namespace] = o;
-				
-				return new _$wrap(o);
-			},
-			'String,_$over' : function(namespace, over) {
-				if (_$classes.indexOf(namespace) != -1) {
-					throw new Error();
-				}
-				
-				var o = _$chain(namespace, over.overload());
-
-				_$classes.push(namespace);
-				_$new[namespace] = o;
-				
-				return new _$wrap(o);
-			}
-		};
-		
-		return _$$overload(_o, arguments, this);
 	}
 	
 	/**
