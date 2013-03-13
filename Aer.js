@@ -21,6 +21,7 @@
 	// environment internals
 	var _$aerclass = {},
 		_$all = false,
+		_$protos = 0,
 		_$classes = [],
 		_$dependencies = [],
 		_$namespaces = {},
@@ -65,7 +66,7 @@
 	/**
 	 * Define the main program
 	 */
-	function _$main(fn) {
+	function _$main(fn) { 'use strict';
 		_$mainprog = fn;
 		var check = setInterval(function() {
 			_$check(check);
@@ -75,13 +76,18 @@
 	/**
 	 * Check the dependencies, than run the main program
 	 */
-	function _$check(timevar) {
+	function _$check(timevar) { 'use strict';
 		var i, l;
 		
 		for (i=0, l=_$dependencies.length; i<l; i++) {
 			if (!_$new[_$dependencies[i]]) {
 				return;
 			}
+		}
+		
+		if (_$protos > 0) {
+			alert('ahahahah')
+			return;
 		}
 		
 		clearInterval(timevar);
@@ -109,7 +115,7 @@
 	/**
 	 *
 	 */
-	function _$class(namespace) {
+	function _$class(namespace) { 'use strict';
 		var transitory = new _$transitory();
 		
 		transitory.namespace = namespace;
@@ -140,6 +146,12 @@
 					_$new[this.namespace] = o;
 					
 					this.o = o;
+					
+					if (this.extended !== undefined) {
+						_$protos += 1;
+						_$proto(this.o, this.extended, this.namespace);
+					}
+					
 					return this;
 				},
 				'Function' : function(implementation) {
@@ -149,6 +161,12 @@
 					_$new[this.namespace] = o;
 					
 					this.o = o;
+					
+					if (this.extended !== undefined) {
+						_$protos += 1;
+						_$proto(this.o, this.extended, this.namespace);
+					}
+					
 					return this;
 				}
 			};
@@ -171,6 +189,34 @@
 		}
 	}
 	
+	/**
+	 * 
+	 */
+	function _$proto(o, x, n) { 'use strict';
+		var ok = setInterval(function() {
+			_$async(o, x, n, ok);
+		}, 100);
+	}
+	
+	/**
+	 * 
+	 */
+	function _$async(o, x, n, timevar) { 'use strict';
+		var i, l;
+		
+		for (i=0, l=_$dependencies.length; i<l; i++) {
+			if (!_$new[_$dependencies[i]]) {
+				return;
+			}
+		}
+		
+		o.prototype = _$mix(x);
+		o.prototype.aer$classname = n;
+		
+		clearInterval(timevar);
+		
+		_$protos -= 1;
+	}
 	
 	/**
 	 * Imports required classes
@@ -213,12 +259,14 @@
 	/**
 	 * Mix multiples objects
 	 */
-	function _$mix() { 'use strict';
+	function _$mix(array) { 'use strict';
 		var obj = {}, i, prop;
 		
-		for (i = 0; i < arguments.length; i++) {
-			for (prop in arguments[i]) {
-				obj[prop] = arguments[i][prop];
+		for (i = 0; i < array.length; i++) {
+			for (prop in _$new[array[i]].prototype) {
+				if (prop != 'aer$classname') {
+					obj[prop] = _$new[array[i]].prototype[prop];
+				}
 			}
 		}
 		
@@ -262,7 +310,7 @@
 	 * A great way to overload functions!!! XD
 	 * The modified overload that works with the aer$classname prototype attribute
 	 */
-	function _$$overload(pointer, args, context) {
+	function _$$overload(pointer, args, context) { 'use strict';
 		var types = [], i;
 		
 		for (i = 0; i < args.length; i++) {
