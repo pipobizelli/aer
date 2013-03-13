@@ -53,52 +53,14 @@
 	Aer['@overload'] = _$over;
 	Aer['@config'];
 	Aer['@loading'] = _$loading;
-	//Aer['@require'] = _$require;
 	Aer['@namespace'];
 	Aer['@define'];
 	Aer['@mix'];
 	Aer['@import'] = _$import;
 	Aer['@require'] = _$require;
-	Aer['@async'] = _$async;
 	Aer['@project'] = _$project;
 	Aer['@main'] = _$main;
-	//Aer['@prototype'] = _$prototype;
 	
-	/**
-	 * This object is the core of the chained directives.
-	 * First instance directives must return this wrapper.
-	 */
-	function _$wrap(obj) {
-		this.o = obj;
-	}
-	_$wrap.prototype = {
-		aer$classname : '_$wrap'
-	}
-	
-	_$wrap.prototype['@prototype'] = (function() {
-		var _o = {
-			'Object' : function(obj) {
-				var _class = this.o.prototype.aer$classname;
-				
-				this.o.prototype = obj;
-				this.o.prototype.aer$classname = _class;
-				
-				return this;
-			}
-		}
-		
-		return function() {
-			return _$$overload(_o, arguments, this);
-		}
-	})();
-	
-	_$wrap.prototype['@return'] = function() {
-		
-	}
-	
-	_$wrap.prototype['@global'] = function() {
-		
-	}
 	
 	/**
 	 * Define the main program
@@ -158,19 +120,19 @@
 	/**
 	 * Transitory object
 	 */
-	function _$transitory() {
+	function _$transitory() { 'use strict';
 		this.namespace;
 		this.extended;
 		this.o;
 	}
 	_$transitory.prototype = {
 		aer$classname : '_$transitory',
-		'@extend' : function() {
+		'@extend' : function() { 'use strict';
 			this.extended = arguments;
 			return this;
 		},
-		'@' : function() {
-			_o = {
+		'@' : function() { 'use strict';
+			var _o = {
 				'_$over' : function(over) {
 					var o = _$chain(this.namespace, over.overload());
 
@@ -193,7 +155,7 @@
 			
 			return _$$overload(_o, arguments, this);
 		},
-		'@prototype' : function() {
+		'@prototype' : function() { 'use strict';
 			var _o = {
 				'Object' : function(obj) {
 					var _class = this.o.prototype.aer$classname;
@@ -205,7 +167,6 @@
 				}
 			}
 			
-
 			return _$$overload(_o, arguments, this);
 		}
 	}
@@ -234,14 +195,7 @@
 	function _$require(namespace) { 'use strict';
 		_$import(namespace, false);
 	}
-	
-	/**
-	 * Import required classes asynchronously
-	 */
-	function _$async() { 'use strict';
-		_$import(namespace, true);
-	}
-	
+
 	/**
 	 * 
 	 */
@@ -254,17 +208,6 @@
 	 */
 	function _$define(directive, fn) { 'use strict';
 		Aer[directive] = fn;
-	}
-	
-	/**
-	 * 
-	 */
-	function _$namespace(str) { 'use strict';
-		var n = str.split['.'], i, l;
-		
-		for (i = 0, l = n.length; i < l; i++) {
-			
-		}
 	}
 	
 	/**
@@ -316,26 +259,7 @@
 	}
 	
 	/**
-	 * 
-	 */
-	function _$prototype() { 'use strict';
-		var _o = {
-			'Object' : function(o) {
-				return this;
-			},
-			'_$class,Object' : function(c, o) {
-				return this;
-			}
-		};
-		
-		return function() {
-			return _$$overload(_o, arguments, this);
-		}
-	}
-	
-	/**
 	 * A great way to overload functions!!! XD
-	 * 
 	 * The modified overload that works with the aer$classname prototype attribute
 	 */
 	function _$$overload(pointer, args, context) {
