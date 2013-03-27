@@ -291,6 +291,9 @@
 	
 	/**
 	 * The injector
+	 * As JavaScript supports reflection via eval() method and Function() constructor,
+	 * it's easy to inject dependencies into functions and constructor. As you can see,
+	 * we can return an evalued function definition or anything else by the eval() XD.
 	 * 
 	 * @author Fernando Faria
 	 */
@@ -300,12 +303,13 @@
 	}
 	_$injector.prototype = {
 		aer$classname : '_$injector',
+		/**
+		 * @method inject
+		 * @return {Function} An evalued function with injected dependencies
+		 * @author Fernando Faria
+		 */
 		inject : function() {
-			var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
-				FN_ARG_SPLIT = /,/,
-				FN_ARG = /^\s*(_?)(\S+?)\1\s*$/,
-				STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
-				FN_PARTS = /(^function\s*\([\s\S]*\)\s*\{)([\s\S]*)(\}$)/m,
+			var FN_PARTS = /(^function\s*\([\s\S]*\)\s*\{)([\s\S]*)(\}$)/m,
 				fnstr = this.fn.toString(),
 				fndeclaration = fnstr.match(FN_PARTS)[1],
 				fnbody = fnstr.match(FN_PARTS)[2],
@@ -324,7 +328,7 @@
 		}
 	}
 	
-	var a = new _$injector(function(a, b, c) {alert('aha');}, []).inject();
-	a()
+	var a = new _$injector(function(a, b, c) {alert('aha');}, ['Array']).inject();
+	alert(a)
 	$global.Aer = Aer;
 })(this);
