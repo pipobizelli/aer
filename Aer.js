@@ -59,7 +59,6 @@
 	Aer['@mix'];
 	Aer['@import'] = _$import;
 	Aer['@require'] = _$require;
-	Aer['@project'] = _$project;
 	Aer['@main'] = _$main;
 	
 	
@@ -86,30 +85,12 @@
 		}
 		
 		if (_$protos > 0) {
-			alert('ahahahah')
 			return;
 		}
 		
 		clearInterval(timevar);
 		
 		_$mainprog();
-	}
-	
-	/**
-	 *
-	 */
-	function _$project(cfg) {
-		var i, l;
-		
-		_$root = cfg['@root'] || '';
-		
-		for (i=0, l=cfg['@dependencies'].length; i<l; i++) {
-			Aer['@sync'](cfg['@dependencies'][i]);
-		}
-		
-		if (cfg['@main']) {
-			Aer['@sync'](cfg['@main']);
-		}
 	}
 	
 	/**
@@ -139,21 +120,6 @@
 		},
 		'@' : function() { 'use strict';
 			var _o = {
-				'_$over' : function(over) {
-					var o = _$chain(this.namespace, over.overload());
-
-					_$classes.push(this.namespace);
-					_$new[this.namespace] = o;
-					
-					this.o = o;
-					
-					if (this.extended !== undefined) {
-						_$protos += 1;
-						_$proto(this.o, this.extended, this.namespace);
-					}
-					
-					return this;
-				},
 				'Function' : function(implementation) {
 					var o = _$chain(this.namespace, implementation);
 					
@@ -241,20 +207,6 @@
 	function _$require(namespace) { 'use strict';
 		_$import(namespace, false);
 	}
-
-	/**
-	 * 
-	 */
-	function _$register() { 'use strict';
-		
-	}
-	
-	/**
-	 * 
-	 */
-	function _$define(directive, fn) { 'use strict';
-		Aer[directive] = fn;
-	}
 	
 	/**
 	 * Mix multiples objects
@@ -324,14 +276,6 @@
 	 * This must be an object that Aer['@class'] can recognize overloaded classes implementations
 	 */
 	function _$over() { 'use strict';
-		if (this.aer$classname === 'Function') {
-			if (arguments[0] && arguments[1]) {
-				return new _$over(arguments[0], arguments[1]);
-			}
-			
-			return new _$over(arguments[0]);
-		}
-		
 		return _$$overload(_$over, arguments, this);
 	}
 	_$over.prototype.aer$classname = '_$over';
@@ -342,17 +286,6 @@
 	_$over['Object'] = function(o) { 'use strict';
 		return function() {
 			return _$$overload(o, arguments, this);
-		}
-	}
-	
-	/**
-	 * 
-	 */
-	_$over['String,Object'] = function(s, o) { 'use strict';
-		this.overload = function() {
-			return function() {
-				return _$$overload(o, arguments, this);
-			}
 		}
 	}
 	
