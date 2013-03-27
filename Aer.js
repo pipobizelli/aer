@@ -298,8 +298,7 @@
 	 * @author Fernando Faria
 	 */
 	function _$injector(fn, dependencies) { 'use strict';
-		this.fn = fn;
-		this.dependencies = dependencies;
+		return _$$overload(_$injector, arguments, this);
 	}
 	_$injector.prototype = {
 		aer$classname : '_$injector',
@@ -327,8 +326,16 @@
 			return eval('(' + fndeclaration + ')');
 		}
 	}
+	_$injector['Function,Array'] = function(fn, dependencies) {
+		this.fn = fn;
+		this.dependencies = dependencies;
+	}
+	_$injector['Function,Array,Object'] = function(fn, dependencies, o) {
+		this.fn = fn;
+		this.dependencies = dependencies;
+		this.o = o;
+	}
 	
-	var a = new _$injector(function(a, b, c) {alert('aha');}, ['Array']).inject();
-	alert(a)
+	
 	$global.Aer = Aer;
 })(this);
