@@ -289,5 +289,42 @@
 		}
 	}
 	
+	/**
+	 * The injector
+	 * 
+	 * @author Fernando Faria
+	 */
+	function _$injector(fn, dependencies) { 'use strict';
+		this.fn = fn;
+		this.dependencies = dependencies;
+	}
+	_$injector.prototype = {
+		aer$classname : '_$injector',
+		inject : function() {
+			var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
+				FN_ARG_SPLIT = /,/,
+				FN_ARG = /^\s*(_?)(\S+?)\1\s*$/,
+				STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+				FN_PARTS = /(^function\s*\([\s\S]*\)\s*\{)([\s\S]*)(\}$)/m,
+				fnstr = this.fn.toString(),
+				fndeclaration = fnstr.match(FN_PARTS)[1],
+				fnbody = fnstr.match(FN_PARTS)[2],
+				fnclose = fnstr.match(FN_PARTS)[3],
+				injected = '',
+				dependencies = this.dependencies,
+				i, l;
+			
+			for (i = 0, l = dependencies.length; i < l; i++) {
+				injected += _$new[dependencies[i]] ? '_$new[' + dependencies[i] + '].apply(this, arguments);' : dependencies[i] + '.apply(this, arguments);';
+			}
+			
+			fndeclaration += (injected + fnbody + fnclose);
+			
+			return eval('(' + fndeclaration + ')');
+		}
+	}
+	
+	var a = new _$injector(function(a, b, c) {alert('aha');}, []).inject();
+	a()
 	$global.Aer = Aer;
 })(this);
